@@ -27,16 +27,16 @@ export const defaultRepeatInfo = (repeatType: RepeatType = 'none'): RepeatInfo =
  */
 export const createMockEvent = (overrides?: Partial<Event>): Event => {
   return {
-    id: 'default-id',
+    id: '',
     title: 'Default Event',
     date: '2024-01-01',
-    startTime: '09:00',
-    endTime: '10:00',
-    description: 'Default Description',
-    location: 'Default Location',
-    category: 'Default Category',
+    startTime: '',
+    endTime: '',
+    description: '',
+    location: '',
+    category: '',
     repeat: defaultRepeatInfo(),
-    notificationTime: 30, // 30분 전
+    notificationTime: 0, // 30분 전
     ...overrides,
   };
 };
