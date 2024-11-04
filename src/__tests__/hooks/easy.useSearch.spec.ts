@@ -80,7 +80,7 @@ describe('useSearch', () => {
     expect(result.current.filteredEvents).toEqual([events[2]]);
   });
 
-  // TODO: 세부적으로 테스트케이스를 나눠보았습니다. (주/월간)
+  // INFO: 세부적으로 테스트케이스를 나눠보았습니다. (주/월간)
   describe('현재 뷰(주간/월간)에 해당하는 이벤트만 반환해야 한다', () => {
     it('이번 주에 해당하는 이벤트만 반환해야 한다', () => {
       const { result } = renderHook(() => useSearch(events, new Date(), viewWeek));

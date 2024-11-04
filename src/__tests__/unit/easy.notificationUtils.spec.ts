@@ -96,7 +96,7 @@ describe('createNotificationMessage', () => {
     expect(message).toBe(expectedMessage);
   });
 
-  // TODO: TC 추가
+  // INFO: TC 추가
   it('notificationTime이 0인 경우 메시지가 올바르게 생성된다', () => {
     const event: Event = createMockEvent({
       id: '2',

@@ -8,7 +8,7 @@ import {
 } from '../../__mocks__/handlersUtils.ts';
 import { useEventOperations } from '../../hooks/useEventOperations.ts';
 import { server } from '../../setupTests.ts';
-import { Event, EventForm } from '../../types.ts';
+import { Event } from '../../types.ts';
 import { createMockEvent } from '../utils.ts';
 
 // ? Medium: 아래 toastFn과 mock과 이 fn은 무엇을 해줄까요?
@@ -27,7 +27,7 @@ vi.mock('@chakra-ui/react', async () => {
 
 describe('useEventOperations', () => {
   // 초기 이벤트 데이터를 불러오는 테스트
-  // TODO: 테스트 케이스 문구를 더 정확하게 변경하였습니다.
+  // INFO: 테스트 케이스 문구를 더 정확하게 변경하였습니다.
   it('저장되어있는 초기 이벤트 데이터가 정상적으로 호툴된다', async () => {
     const { result } = renderHook(() => useEventOperations(false));
 
@@ -52,7 +52,7 @@ describe('useEventOperations', () => {
     ]);
   });
 
-  // TODO: 토스트 호출 유무도 확인합니다.
+  // INFO: 토스트 호출 유무도 확인합니다.
   it('초기 로딩 완료 토스트가 호출되었는지 확인', async () => {
     const { result } = renderHook(() => useEventOperations(false));
 
@@ -128,7 +128,7 @@ describe('useEventOperations', () => {
     expect(event?.title).toBe('수정된 회의');
     expect(event?.endTime).toBe('13:30');
 
-    // TODO: 토스트 호출 유무 따로 확인합니다.
+    // INFO: 토스트 호출 유무 따로 확인합니다.
     // 업데이트 성공 토스트가 호출되었는지 확인
     expect(toastFn).toHaveBeenCalledWith({
       title: '일정이 수정되었습니다.',
@@ -159,93 +159,89 @@ describe('useEventOperations', () => {
     });
   });
 
-  // // 이벤트 로딩 실패 시 에러 토스트 표시 테스트
-  // it("이벤트 로딩 실패 시 '이벤트 로딩 실패'라는 텍스트와 함께 에러 토스트가 표시되어야 한다", async () => {
-  //   // GET /api/events를 실패하도록 핸들러 재정의
-  //   server.use(
-  //     rest.get('/api/events', (req, res, ctx) => {
-  //       return res(ctx.status(500));
-  //     })
-  //   );
+  // 이벤트 로딩 실패 시 에러 토스트 표시 테스트
+  it("이벤트 로딩 실패 시 '이벤트 로딩 실패'라는 텍스트와 함께 에러 토스트가 표시되어야 한다", async () => {
+    // NOTE: GET /api/events를 실패하도록 핸들러 재정의 (https://mswjs.io/docs/recipes/network-errors/)
+    server.use(
+      http.get('/api/events', () => {
+        return new HttpResponse(null, { status: 401 }); // 이건 특정 error status code
+      })
+    );
 
-  //   const { result, waitForNextUpdate } = renderHook(() => useEventOperations(false));
+    const { result } = renderHook(() => useEventOperations(false));
+    await act(async () => {
+      await result.current.fetchEvents();
+    });
 
-  //   // fetchEvents 호출 대기
-  //   await waitForNextUpdate();
+    expect(result.current.events).toHaveLength(0);
 
-  //   expect(result.current.events).toHaveLength(0);
+    // 에러 토스트가 호출되었는지 확인
+    expect(toastFn).toHaveBeenCalledWith({
+      title: '이벤트 로딩 실패',
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
+  });
 
-  //   // 에러 토스트가 호출되었는지 확인
-  //   expect(toastFn).toHaveBeenCalledWith({
-  //     title: '이벤트 로딩 실패',
-  //     status: 'error',
-  //     duration: 3000,
-  //     isClosable: true,
-  //   });
-  // });
+  // 존재하지 않는 이벤트 수정 시 에러 토스트 표시 테스트
+  it("존재하지 않는 이벤트 수정 시 '일정 저장 실패'라는 토스트가 노출되며 에러 처리가 되어야 한다", async () => {
+    const { result } = renderHook(() => useEventOperations(true));
 
-  // // 존재하지 않는 이벤트 수정 시 에러 토스트 표시 테스트
-  // it("존재하지 않는 이벤트 수정 시 '일정 저장 실패'라는 토스트가 노출되며 에러 처리가 되어야 한다", async () => {
-  //   const { result } = renderHook(() => useEventOperations(true));
+    const nonExistentEvent: Event = createMockEvent({
+      id: '999', // 존재하지 않는 ID
+      title: '없는 이벤트',
+      date: '2024-11-05',
+      startTime: '15:00',
+      endTime: '16:00',
+      notificationTime: 20,
+      description: '없는 이벤트 설명',
+      location: '없는 장소',
+      category: '없음',
+    });
 
-  //   const nonExistentEvent: Event = {
-  //     id: '999', // 존재하지 않는 ID
-  //     title: '없는 이벤트',
-  //     date: '2024-11-05',
-  //     startTime: '15:00',
-  //     endTime: '16:00',
-  //     notificationTime: 20,
-  //     description: '없는 이벤트 설명',
-  //     location: '없는 장소',
-  //     category: '없음',
-  //   };
+    await act(async () => {
+      await result.current.saveEvent(nonExistentEvent);
+    });
 
-  //   await act(async () => {
-  //     await result.current.saveEvent(nonExistentEvent);
-  //   });
+    // 저장 실패 토스트가 호출되었는지 확인
+    expect(toastFn).toHaveBeenCalledWith({
+      title: '일정 저장 실패',
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
 
-  //   // 저장 실패 토스트가 호출되었는지 확인
-  //   expect(toastFn).toHaveBeenCalledWith({
-  //     title: '일정 저장 실패',
-  //     status: 'error',
-  //     duration: 3000,
-  //     isClosable: true,
-  //   });
+    // 이벤트 목록에 변경이 없는지 확인
+    expect(result.current.events).toHaveLength(1);
+    expect(result.current.events.find((e) => e.id === '999')).toBeUndefined();
+  });
 
-  //   // 이벤트 목록에 변경이 없는지 확인
-  //   expect(result.current.events).toHaveLength(2);
-  //   expect(result.current.events.find((e) => e.id === '999')).toBeUndefined();
-  // });
+  // 네트워크 오류 시 이벤트 삭제 실패 테스트
+  it("네트워크 오류 시 '일정 삭제 실패'라는 텍스트가 노출되며 이벤트 삭제가 실패해야 한다", async () => {
+    const { result } = renderHook(() => useEventOperations(false));
 
-  // // 네트워크 오류 시 이벤트 삭제 실패 테스트
-  // it("네트워크 오류 시 '일정 삭제 실패'라는 텍스트가 노출되며 이벤트 삭제가 실패해야 한다", async () => {
-  //   const { result, waitForNextUpdate } = renderHook(() => useEventOperations(false));
+    // NOTE: DELETE /api/events/:id를 실패하도록 핸들러 재정의
+    server.use(
+      http.delete('/api/events/:id', () => {
+        return HttpResponse.error(); // 이건 네트워크 에러
+      })
+    );
 
-  //   // 초기 fetchEvents 호출 대기
-  //   await waitForNextUpdate();
+    await act(async () => {
+      await result.current.deleteEvent('1');
+    });
 
-  //   // DELETE /api/events/:id를 실패하도록 핸들러 재정의
-  //   server.use(
-  //     rest.delete('/api/events/:id', (req, res, ctx) => {
-  //       return res(ctx.status(500));
-  //     })
-  //   );
+    // 삭제 실패 토스트가 호출되었는지 확인
+    expect(toastFn).toHaveBeenCalledWith({
+      title: '일정 삭제 실패',
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+    });
 
-  //   await act(async () => {
-  //     await result.current.deleteEvent('1');
-  //     await waitForNextUpdate(); // fetchEvents가 완료되기를 기다림
-  //   });
-
-  //   // 삭제 실패 토스트가 호출되었는지 확인
-  //   expect(toastFn).toHaveBeenCalledWith({
-  //     title: '일정 삭제 실패',
-  //     status: 'error',
-  //     duration: 3000,
-  //     isClosable: true,
-  //   });
-
-  //   // 이벤트 목록에 삭제되지 않았는지 확인
-  //   expect(result.current.events).toHaveLength(2);
-  //   expect(result.current.events.find((e) => e.id === '1')).toBeDefined();
-  // });
+    // 이벤트 목록에 삭제되지 않았는지 확인
+    expect(result.current.events).toHaveLength(1);
+    expect(result.current.events.find((e) => e.id === '1')).toBeDefined();
+  });
 });
