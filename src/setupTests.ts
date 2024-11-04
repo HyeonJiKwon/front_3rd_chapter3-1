@@ -17,6 +17,9 @@ beforeEach(() => {
   expect.hasAssertions();
 
   vi.setSystemTime(new Date('2024-10-01')); // ? Medium: 왜 이 시간을 설정해주는 걸까요?
+  /**
+   * A : easy.useCalendarView.spec 테스트 시 필요함.
+   */
 });
 
 afterEach(() => {
