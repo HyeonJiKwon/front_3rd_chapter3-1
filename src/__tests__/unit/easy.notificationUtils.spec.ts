@@ -75,19 +75,6 @@ describe('getUpcomingEvents', () => {
     const result = getUpcomingEvents(events, fixedNow, notifiedEvents);
     expect(result).not.toContainEqual(events[2]);
   });
-
-  // FIXME: 테스트 문구가 정확하지 못함. -위에서 모두 테스트된 내용이므로 필요없는 테스트로 보입니다.
-  it('여러 조건을 만족하는 이벤트를 정확히 반환한다', () => {
-    const notifiedEvents: string[] = ['3'];
-
-    // 이벤트 1: 12:15 시작, notificationTime: 15분 → 포함
-    // 이벤트 4: 12:05 시작, notificationTime: 10분 → timeDiff = 5분 >0 && <=10 → 포함
-    // 이벤트 3: 알림이 이미 간 상태, 제외
-
-    const result = getUpcomingEvents(events, fixedNow, notifiedEvents);
-    expect(result).toEqual([events[0], events[3]]);
-    expect(result).not.toContainEqual(events[2]);
-  });
 });
 
 describe('createNotificationMessage', () => {
@@ -109,6 +96,7 @@ describe('createNotificationMessage', () => {
     expect(message).toBe(expectedMessage);
   });
 
+  // TODO: TC 추가
   it('notificationTime이 0인 경우 메시지가 올바르게 생성된다', () => {
     const event: Event = createMockEvent({
       id: '2',

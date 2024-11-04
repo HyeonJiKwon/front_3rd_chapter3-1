@@ -41,10 +41,11 @@ it("주간 뷰에서 다음으로 navigate시 7일 후 '2024-10-08' 날짜로 �
   act(() => {
     result.current.setView('week');
   });
+  expect(result.current.view).toBe('week');
+
   act(() => {
     result.current.navigate('next');
   });
-
   assertDate(result.current.currentDate, new Date('2024-10-08'));
 });
 
@@ -54,11 +55,11 @@ it("주간 뷰에서 이전으로 navigate시 7일 전 '2024-09-24' 날짜로 �
   act(() => {
     result.current.setView('week');
   });
+  expect(result.current.view).toBe('week');
+
   act(() => {
     result.current.navigate('prev');
   });
-
-  console.log(result.current.view);
   assertDate(result.current.currentDate, new Date('2024-09-24'));
 });
 

@@ -15,10 +15,14 @@ export const parseHM = (timestamp: number) => {
 /**
  * 기본 RepeatInfo 객체
  */
-export const defaultRepeatInfo = (repeatType: RepeatType = 'none'): RepeatInfo => {
+export const defaultRepeatInfo = (
+  repeatType: RepeatType = 'none',
+  endDate?: string
+): RepeatInfo => {
   return {
     type: repeatType,
     interval: 1,
+    endDate: endDate,
   };
 };
 
