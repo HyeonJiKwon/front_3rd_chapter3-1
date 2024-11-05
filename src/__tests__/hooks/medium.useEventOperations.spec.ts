@@ -28,7 +28,7 @@ vi.mock('@chakra-ui/react', async () => {
 describe('useEventOperations', () => {
   // 초기 이벤트 데이터를 불러오는 테스트
   // INFO: 테스트 케이스 문구를 더 정확하게 변경하였습니다.
-  it('저장되어있는 초기 이벤트 데이터가 정상적으로 호툴된다', async () => {
+  it('저장되어있는 초기 이벤트 데이터가 정상적으로 호출된다', async () => {
     const { result } = renderHook(() => useEventOperations(false));
 
     await act(async () => {
