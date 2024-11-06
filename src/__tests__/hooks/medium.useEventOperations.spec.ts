@@ -73,6 +73,7 @@ describe('useEventOperations', () => {
     const { result } = renderHook(() => useEventOperations(false, () => {}));
 
     const newEvent = createMockEvent({
+      id: '1',
       title: '새 이벤트',
       date: '2024-11-04',
       startTime: '14:00',

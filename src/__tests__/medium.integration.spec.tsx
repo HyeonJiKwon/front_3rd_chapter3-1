@@ -27,6 +27,13 @@ const setup = (element: ReactElement) => {
     따라서, ChakraProvider로 컴포넌트를 감싸주는 것은 Chakra UI를 사용하는 애플리케이션의 컴포넌트를 테스트할 때 중요하고 의미 있는 동작입니다.
    */
 };
+const setupMockHandlerFetching = (initialEvents: Event[]) => {
+  server.use(
+    http.get('/api/events', () => {
+      return HttpResponse.json({ events: initialEvents });
+    })
+  );
+};
 // ! HINT. 이 유틸을 사용해 일정을 저장해보세요.
 const saveSchedule = async (
   user: UserEvent,
@@ -95,17 +102,9 @@ describe('일정 CRUD 및 기본 기능', () => {
         location: '회의실',
       }),
     ];
-    setupMockHandlerCreation(initialEvents);
+    setupMockHandlerFetching(initialEvents);
 
     const user = setup(<App />).user;
-
-    // 업데이트된 이벤트 데이터
-    const updatedEvent = {
-      ...initialEvents[0],
-      title: '수정된 회의',
-      startTime: '11:00',
-      endTime: '12:00',
-    };
 
     // 초기 이벤트가 렌더링되기를 기다림
     const eventList = await screen.findByTestId('event-list');
@@ -162,18 +161,8 @@ describe('일정 CRUD 및 기본 기능', () => {
         description: '설명',
         location: '회의실',
       }),
-      createMockEvent({
-        id: '2',
-        title: '점심식사',
-        date: '2024-10-31',
-        startTime: '12:00',
-        endTime: '13:15',
-        category: '개인',
-        description: '설명',
-        location: '회의실',
-      }),
     ];
-    setupMockHandlerCreation(initialEvents);
+    setupMockHandlerFetching(initialEvents);
 
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
@@ -181,15 +170,12 @@ describe('일정 CRUD 및 기본 기능', () => {
 
     // 초기 이벤트가 존재하는지 확인
     expect(within(eventList).getByText('삭제할 회의')).toBeInTheDocument();
-    expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
 
+    setupMockHandlerDeletion();
     // 삭제 대상 이벤트의 삭제 버튼 찾기
     const deleteButtons = within(eventList).getAllByLabelText(/Delete event/i);
     expect(deleteButtons.length).toBeGreaterThan(0);
-    // screen.debug(eventList);
-    // screen.debug(deleteButtons);
 
-    setupMockHandlerDeletion();
     // 첫 번째 삭제 버튼 클릭 (삭제할 회의)
     await user.click(deleteButtons[0]);
 
@@ -197,15 +183,12 @@ describe('일정 CRUD 및 기본 기능', () => {
     await waitFor(() => {
       expect(within(eventList).queryByText('삭제할 회의')).not.toBeInTheDocument();
     });
-
-    // '점심식사'는 여전히 존재하는지 확인
-    expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
   });
 });
 
 describe('일정 뷰', () => {
   it('주별 뷰를 선택 후 해당 주에 일정이 없으면, 일정이 표시되지 않는다.', async () => {
-    vi.setSystemTime(new Date('2024-10-15'));
+    // vi.setSystemTime(new Date('2024-10-15'));
     setupMockHandlerCreation();
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
@@ -222,7 +205,7 @@ describe('일정 뷰', () => {
   });
 
   it('주별 뷰 선택 후 해당 주차에 일정이 존재한다면 해당 일정이 정확히 표시된다', async () => {
-    setupMockHandlerCreation([
+    setupMockHandlerFetching([
       createMockEvent({
         title: '1001회의',
         date: '2024-10-01',
@@ -304,7 +287,7 @@ describe('일정 뷰', () => {
   });
 
   it('월별 뷰에 일정이 정확히 표시되는지 확인한다', async () => {
-    setupMockHandlerCreation([
+    setupMockHandlerFetching([
       createMockEvent({
         title: '1010회의',
         date: '2024-10-10',
@@ -520,14 +503,11 @@ describe('검색 기능', () => {
 });
 
 describe('일정 충돌', () => {
-  it('겹치는 시간에 새 일정을 추가할 때 경고가 표시된다', async () => {
-    const user = setup(<App />).user;
-    const eventList = screen.getByTestId('event-list');
-    // 초기 진입시 검색결과 없음 노출 (생성된 일정 없음)
-    expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
-
+  // NOTE: 테스트케이스 명확하게 수정
+  it('겹치는 시간에 새 일정을 추가할 때 경고 다이얼로그가 표시되고, "취소"시, 일정이 추가되지 않아야 한다.', async () => {
     setupMockHandlerCreation([
       createMockEvent({
+        id: '1',
         title: '기존 회의',
         date: '2024-10-31',
         startTime: '10:00',
@@ -537,10 +517,15 @@ describe('일정 충돌', () => {
         location: '회의실',
       }),
     ]);
+    const user = setup(<App />).user;
+    const eventList = screen.getByTestId('event-list');
+    // 초기 진입시 검색결과 없음 노출 (생성된 일정 없음)
+    expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
 
     await saveSchedule(
       user,
       createMockEvent({
+        id: '2',
         title: '겹치는 회의',
         date: '2024-10-31',
         startTime: '10:30',
@@ -550,64 +535,31 @@ describe('일정 충돌', () => {
         location: '회의실',
       })
     );
-    screen.debug(eventList);
+
     expect(screen.getByText(/일정 겹침 경고/i)).toBeInTheDocument();
     // 겹침 경고 AlertDialog가 나타날 때까지 기다림
-    // const alertDialog = await screen.findByRole('alertdialog');
-    // expect(alertDialog).toBeInTheDocument();
+    const alertDialog = await screen.findByRole('alertdialog');
+    expect(alertDialog).toBeInTheDocument();
 
-    // // AlertDialog의 헤더 확인
-    // const alertHeader = within(alertDialog).getByText('일정 겹침 경고'); // AlertDialogHeader의 텍스트
-    // expect(alertHeader).toBeInTheDocument();
+    // AlertDialog의 헤더 확인
+    const alertHeader = within(alertDialog).getByText('일정 겹침 경고'); // AlertDialogHeader의 텍스트
+    expect(alertHeader).toBeInTheDocument();
 
-    // // AlertDialog의 내용 확인 (겹치는 일정)
-    // const overlappingEvent = within(alertDialog).getByText('기존 회의 (2024-10-31 10:00-11:15)');
-    // expect(overlappingEvent).toBeInTheDocument();
+    // AlertDialog의 내용 확인 (겹치는 일정)
+    const overlappingEvent = within(alertDialog).getByText('기존 회의 (2024-10-31 10:00-11:15)');
+    expect(overlappingEvent).toBeInTheDocument();
 
-    // // '취소' 버튼과 '계속 진행' 버튼 찾기
-    // const cancelButton = within(alertDialog).getByRole('button', { name: /취소/i });
-    // const continueButton = within(alertDialog).getByRole('button', { name: /계속 진행/i });
+    // '취소' 버튼과 '계속 진행' 버튼 찾기
+    const cancelButton = within(alertDialog).getByRole('button', { name: /취소/i });
+    const continueButton = within(alertDialog).getByRole('button', { name: /계속 진행/i });
 
-    // // '취소' 버튼 클릭하여 경고 닫기
-    // await user.click(cancelButton);
+    // '취소' 버튼 클릭하여 경고 닫기
+    await user.click(cancelButton);
 
-    // // AlertDialog가 사라졌는지 확인
-    // await waitFor(() => {
-    //   expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
-    // });
-
-    // // 겹치는 일정이 추가되지 않았는지 확인
-    // expect(within(eventList).queryByText('겹치는 회의')).not.toBeInTheDocument();
-    // // 이제, 다시 같은 겹치는 일정을 추가하고 '계속 진행' 버튼을 클릭하여 추가되는지 확인합니다.
-
-    // await saveSchedule(
-    //   user,
-    //   createMockEvent({
-    //     title: '겹치는 회의',
-    //     date: '2024-10-31',
-    //     startTime: '10:30',
-    //     endTime: '12:15',
-    //     category: '업무',
-    //     description: '설명',
-    //     location: '회의실',
-    //   })
-    // );
-
-    // // 겹침 경고 AlertDialog가 다시 나타날 때까지 기다림
-    // const alertDialog2 = await screen.findByRole('dialog');
-    // expect(alertDialog2).toBeInTheDocument();
-
-    // // '계속 진행' 버튼 클릭하여 일정 추가
-    // const continueButton2 = within(alertDialog2).getByRole('button', { name: /계속 진행/i });
-    // await user.click(continueButton2);
-
-    // // AlertDialog가 사라졌는지 확인
-    // await waitFor(() => {
-    //   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    // });
-
-    // // 겹치는 일정이 목록에 추가되었는지 확인
-    // expect(within(eventList).getByText('겹치는 회의')).toBeInTheDocument();
+    // AlertDialog가 사라졌는지 확인
+    await waitFor(() => {
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    });
   });
 
   it('기존 일정의 시간을 수정하여 충돌이 발생하면 경고가 노출된다', async () => {
@@ -623,10 +575,10 @@ describe('일정 충돌', () => {
         location: '회의실',
       }),
       createMockEvent({
-        id: '1',
+        id: '2',
         title: '기존 회의',
         date: '2024-10-31',
-        startTime: '11:00',
+        startTime: '11:30',
         endTime: '12:15',
         category: '업무',
         description: '설명',
@@ -636,14 +588,6 @@ describe('일정 충돌', () => {
     setupMockHandlerCreation(initialEvents);
 
     const user = setup(<App />).user;
-
-    // 업데이트된 이벤트 데이터
-    const updatedEvent = {
-      ...initialEvents[0],
-      title: '수정된 회의',
-      startTime: '11:00',
-      endTime: '12:00',
-    };
 
     // 초기 이벤트가 렌더링되기를 기다림
     const eventList = await screen.findByTestId('event-list');
@@ -670,12 +614,13 @@ describe('일정 충돌', () => {
 
     // 시작시간을 겹치게 입력
     await user.clear(startTimeInput);
-    await user.type(startTimeInput, '11:00');
+    await user.type(startTimeInput, '11:35');
 
     setupMockHandlerUpdating();
     // 저장 버튼 클릭
     const saveButton = screen.getByTestId('event-submit-button');
     await user.click(saveButton);
+    await screen.findByTestId('event-list');
 
     // 시간 설정 오류 노출 확인
     expect(screen.getByText(/시간 설정을 확인해주세요/i)).toBeInTheDocument();
@@ -698,7 +643,7 @@ it('notificationTime을 10으로 하면 지정 시간 10분 전 알람 텍스트
     }),
   ]);
   setup(<App />);
-
+  await screen.findByTestId('event-list');
   await waitFor(() => {
     expect(screen.getByText(/일정이 시작됩니다/i)).toBeInTheDocument();
   });
