@@ -29,7 +29,6 @@ import {
   Select,
   Text,
   Tooltip,
-  useToast,
   VStack,
 } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
@@ -38,6 +37,7 @@ import { WeekView, MonthView } from './components';
 import { useCalendarView } from './hooks/useCalendarView.ts';
 import { useEventForm } from './hooks/useEventForm.ts';
 import { useEventOperations } from './hooks/useEventOperations.ts';
+import useEventValidation from './hooks/useEventValidation.ts';
 import { useNotifications } from './hooks/useNotifications.ts';
 import { useSearch } from './hooks/useSearch.ts';
 import { Event, EventForm, RepeatType } from './types';
@@ -95,33 +95,15 @@ function App() {
   const { notifications, notifiedEvents, setNotifications } = useNotifications(events);
   const { view, setView, currentDate, holidays, navigate } = useCalendarView();
   const { searchTerm, filteredEvents, setSearchTerm } = useSearch(events, currentDate, view);
+  const { validate } = useEventValidation();
 
   const [isOverlapDialogOpen, setIsOverlapDialogOpen] = useState(false);
   const [overlappingEvents, setOverlappingEvents] = useState<Event[]>([]);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
-  const toast = useToast();
-
   const addOrUpdateEvent = async () => {
-    if (!title || !date || !startTime || !endTime) {
-      toast({
-        title: '필수 정보를 모두 입력해주세요.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    if (startTimeError || endTimeError) {
-      toast({
-        title: '시간 설정을 확인해주세요.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+    const isValid = validate({ title, date, startTime, endTime, startTimeError, endTimeError });
+    if (!isValid) return;
 
     const eventData: Event | EventForm = {
       id: editingEvent ? editingEvent.id : undefined,

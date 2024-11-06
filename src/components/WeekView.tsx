@@ -25,7 +25,7 @@ interface Props {
   notifiedEvents: string[];
 }
 
-export const WeekView = ({ currentDate, holidays, filteredEvents, notifiedEvents }: Props) => {
+export const WeekView = ({ currentDate, filteredEvents, notifiedEvents }: Props) => {
   const weekDates = getWeekDates(currentDate);
   return (
     <VStack data-testid="week-view" align="stretch" w="full" spacing={4}>
