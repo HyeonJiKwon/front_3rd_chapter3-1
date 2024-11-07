@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { render, screen, within, act, waitFor } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import { UserEvent, userEvent } from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { ReactElement } from 'react';
@@ -50,8 +50,6 @@ const saveSchedule = async (
 
   await user.click(screen.getByTestId('event-submit-button'));
 };
-
-// beforeEach(() => setup(<App />));
 
 // ! HINT. "검색 결과가 없습니다"는 초기에 노출되는데요. 그럼 검증하고자 하는 액션이 실행되기 전에 검증해버리지 않을까요? 이 테스트를 신뢰성있게 만드려면 어떻게 할까요?
 describe('일정 CRUD 및 기본 기능', () => {
@@ -188,13 +186,13 @@ describe('일정 뷰', () => {
     setupMockHandlerCreation();
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.getByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
     // 주별 뷰 선택
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'week');
 
-    const weekView = await screen.getByTestId('week-view');
+    const weekView = screen.getByTestId('week-view');
     // 주별 뷰가 렌더링되었는지 확인
     expect(weekView).toBeInTheDocument();
     expect(within(eventList).queryByText('검색 결과가 없습니다.')).toBeInTheDocument();
@@ -215,13 +213,13 @@ describe('일정 뷰', () => {
     const user = setup(<App />).user;
 
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.getByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
     // 주별 뷰 선택
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'week');
 
-    const weekView = await screen.getByTestId('week-view');
+    const weekView = screen.getByTestId('week-view');
     // 주별 뷰가 렌더링되었는지 확인
     expect(weekView).toBeInTheDocument();
     expect(within(weekView).queryByText('1001회의')).toBeInTheDocument();
