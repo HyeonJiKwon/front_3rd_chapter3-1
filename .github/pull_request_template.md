@@ -22,7 +22,13 @@
 - [ ] 해당 모듈들에 대한 적절한 테스트를 2개 이상 작성했는가?
 
 ## 리뷰 받고 싶은 내용
-
+- components 
+  - monthview
+  - weekview
+- hook
+  - useEventValidation
+- utils
+  - prepareEventData
 <!-- 리뷰 받고 싶은 내용을 남겨주세요 -->
 
 ## 궁금한 점
