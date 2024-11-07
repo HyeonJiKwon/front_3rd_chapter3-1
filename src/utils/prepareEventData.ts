@@ -34,8 +34,8 @@ export const prepareEventData = ({
     category,
     repeat: {
       type: isRepeating ? repeatType : 'none',
-      interval: repeatInterval,
-      endDate: repeatEndDate || undefined,
+      interval: isRepeating && repeatInterval ? repeatInterval : 1,
+      endDate: isRepeating && repeatEndDate ? repeatEndDate : undefined,
     },
     notificationTime,
   };
