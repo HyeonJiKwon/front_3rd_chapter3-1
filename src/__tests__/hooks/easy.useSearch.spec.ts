@@ -67,7 +67,19 @@ describe('useSearch', () => {
       result.current.setSearchTerm('점심');
     });
 
-    expect(result.current.filteredEvents).toEqual([events[1]]);
+    expect(result.current.filteredEvents).toEqual([
+      createMockEvent({
+        id: '2',
+        title: '점심 식사',
+        description: '점심을 먹습니다.',
+        location: '식당 B',
+        date: '2024-10-01',
+        startTime: '12:00',
+        endTime: '13:00',
+        notificationTime: 15,
+        category: '식사',
+      }),
+    ]);
   });
 
   it('검색어가 제목, 설명, 위치 중 하나라도 일치하면 해당 이벤트를 반환해야 한다', () => {
@@ -77,14 +89,60 @@ describe('useSearch', () => {
       result.current.setSearchTerm('헬스장');
     });
 
-    expect(result.current.filteredEvents).toEqual([events[2]]);
+    expect(result.current.filteredEvents).toEqual([
+      createMockEvent({
+        id: '3',
+        title: '운동',
+        description: '헬스장 운동입니다.',
+        location: '헬스장 C',
+        date: '2024-10-02',
+        startTime: '18:00',
+        endTime: '19:00',
+        notificationTime: 20,
+        category: '운동',
+      }),
+    ]);
   });
 
   // INFO: 세부적으로 테스트케이스를 나눠보았습니다. (주/월간)
   describe('현재 뷰(주간/월간)에 해당하는 이벤트만 반환해야 한다', () => {
     it('이번 주에 해당하는 이벤트만 반환해야 한다', () => {
       const { result } = renderHook(() => useSearch(events, new Date(), viewWeek));
-      expect(result.current.filteredEvents).toEqual([events[0], events[1], events[2]]);
+      expect(result.current.filteredEvents).toEqual([
+        createMockEvent({
+          id: '1',
+          title: '회의',
+          description: '팀 회의입니다.',
+          location: '회의실 A',
+          date: '2024-10-01',
+          startTime: '09:00',
+          endTime: '10:00',
+          notificationTime: 30,
+          category: '업무',
+        }),
+        createMockEvent({
+          id: '2',
+          title: '점심 식사',
+          description: '점심을 먹습니다.',
+          location: '식당 B',
+          date: '2024-10-01',
+          startTime: '12:00',
+          endTime: '13:00',
+          notificationTime: 15,
+          category: '식사',
+        }),
+        createMockEvent({
+          id: '3',
+          title: '운동',
+          description: '헬스장 운동입니다.',
+          location: '헬스장 C',
+          date: '2024-10-02',
+          startTime: '18:00',
+          endTime: '19:00',
+          notificationTime: 20,
+          category: '운동',
+        }),
+      ]);
     });
 
     it('이번 달에 해당하는 이벤트만 반환해야 한다', () => {
@@ -113,12 +171,36 @@ describe('useSearch', () => {
       result.current.setSearchTerm('회의');
     });
 
-    expect(result.current.filteredEvents).toEqual([events[0]]);
+    expect(result.current.filteredEvents).toEqual([
+      createMockEvent({
+        id: '1',
+        title: '회의',
+        description: '팀 회의입니다.',
+        location: '회의실 A',
+        date: '2024-10-01',
+        startTime: '09:00',
+        endTime: '10:00',
+        notificationTime: 30,
+        category: '업무',
+      }),
+    ]);
 
     act(() => {
       result.current.setSearchTerm('점심');
     });
 
-    expect(result.current.filteredEvents).toEqual([events[1]]);
+    expect(result.current.filteredEvents).toEqual([
+      createMockEvent({
+        id: '2',
+        title: '점심 식사',
+        description: '점심을 먹습니다.',
+        location: '식당 B',
+        date: '2024-10-01',
+        startTime: '12:00',
+        endTime: '13:00',
+        notificationTime: 15,
+        category: '식사',
+      }),
+    ]);
   });
 });

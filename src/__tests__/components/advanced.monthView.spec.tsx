@@ -3,14 +3,13 @@ import { render, screen, within } from '@testing-library/react';
 
 import { MonthView } from '../../components/MonthView';
 import { Event } from '../../types';
-import { formatDate } from '../../utils/dateUtils';
 
 describe('MonthView 컴포넌트 테스트', () => {
   const setup = () => {
     const defaultProps = {
       currentDate: new Date(),
       holidays: {
-        [formatDate(new Date('2024-10-31'), 31)]: '추석',
+        ['2024-10-31']: '추석',
       },
       filteredEvents: [
         {
@@ -59,8 +58,6 @@ describe('MonthView 컴포넌트 테스트', () => {
 
   it('각 날짜가 올바르게 렌더링되는지 확인', () => {
     setup();
-    const dateCells = screen.getAllByRole('cell');
-    console.log(dateCells.length);
     expect(screen.getByText('31')).toBeInTheDocument();
   });
 

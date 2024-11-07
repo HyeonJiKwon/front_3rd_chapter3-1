@@ -45,7 +45,16 @@ describe('getUpcomingEvents', () => {
     const notifiedEvents: string[] = ['4'];
     // 이벤트 1: 12:15 시작, notificationTime: 15분 → 15분 후
     const result = getUpcomingEvents(events, fixedNow, notifiedEvents);
-    expect(result).toEqual([events[0]]);
+    expect(result).toEqual([
+      createMockEvent({
+        id: '1',
+        title: '회의',
+        date: '2024-11-03',
+        startTime: '12:15', // 15분 후
+        endTime: '13:15',
+        notificationTime: 15, // 12:00(현재) 알림
+      }),
+    ]);
   });
 
   it('이미 알림이 간 이벤트는 제외한다', () => {
@@ -64,7 +73,16 @@ describe('getUpcomingEvents', () => {
     // 이벤트 2: 12:30 시작, notificationTime: 15분 → 30 - 15 = 15분 남음
     // timeDiff = 30분 > notificationTime (15분), 제외됨
     const result = getUpcomingEvents(events, fixedNow, notifiedEvents);
-    expect(result).not.toContainEqual(events[1]);
+    expect(result).not.toContainEqual(
+      createMockEvent({
+        id: '2',
+        title: '점심 식사',
+        date: '2024-11-03',
+        endTime: '13:15',
+        startTime: '12:30', // 30분 후
+        notificationTime: 15, // 12:15 알림
+      })
+    );
   });
 
   it('알림 시간이 지난 이벤트는 반환하지 않는다', () => {
@@ -73,7 +91,16 @@ describe('getUpcomingEvents', () => {
     // 이벤트 3: 11:50 시작, notificationTime: 15분 → 이미 시작됨
 
     const result = getUpcomingEvents(events, fixedNow, notifiedEvents);
-    expect(result).not.toContainEqual(events[2]);
+    expect(result).not.toContainEqual(
+      createMockEvent({
+        id: '3',
+        title: '이벤트',
+        date: '2024-11-03',
+        endTime: '13:15',
+        startTime: '11:50', // 10분 전
+        notificationTime: 15, // 11:35 알림
+      })
+    );
   });
 });
 
