@@ -42,6 +42,7 @@ import { useNotifications } from './hooks/useNotifications.ts';
 import { useSearch } from './hooks/useSearch.ts';
 import { Event, EventForm, RepeatType } from './types';
 import { findOverlappingEvents } from './utils/eventOverlap';
+import { prepareEventData } from './utils/prepareEventData.ts';
 import { getTimeErrorMessage } from './utils/timeValidation';
 
 const categories = ['업무', '개인', '가족', '기타'];
@@ -104,9 +105,8 @@ function App() {
   const addOrUpdateEvent = async () => {
     const isValid = validate({ title, date, startTime, endTime, startTimeError, endTimeError });
     if (!isValid) return;
-
-    const eventData: Event | EventForm = {
-      id: editingEvent ? editingEvent.id : undefined,
+    const formData = {
+      editingEvent,
       title,
       date,
       startTime,
@@ -114,13 +114,13 @@ function App() {
       description,
       location,
       category,
-      repeat: {
-        type: isRepeating ? repeatType : 'none',
-        interval: repeatInterval,
-        endDate: repeatEndDate || undefined,
-      },
+      isRepeating,
+      repeatType,
+      repeatInterval,
+      repeatEndDate,
       notificationTime,
     };
+    const eventData = prepareEventData(formData);
 
     const overlapping = findOverlappingEvents(eventData, events);
     if (overlapping.length > 0) {
@@ -286,7 +286,6 @@ function App() {
           {view === 'week' && (
             <WeekView
               currentDate={currentDate}
-              holidays={holidays}
               filteredEvents={filteredEvents}
               notifiedEvents={notifiedEvents}
             />

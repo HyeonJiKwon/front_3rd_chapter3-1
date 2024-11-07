@@ -20,7 +20,6 @@ const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 
 interface Props {
   currentDate: Date;
-  holidays: { [key: string]: string };
   filteredEvents: Event[];
   notifiedEvents: string[];
 }
