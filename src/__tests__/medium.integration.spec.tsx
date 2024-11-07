@@ -20,11 +20,9 @@ const setup = (element: ReactElement) => {
 
   return { ...render(<ChakraProvider>{element}</ChakraProvider>), user }; // ? Medium: 여기서 ChakraProvider로 묶어주는 동작은 의미있을까요? 있다면 어떤 의미일까요?
   /**
-   * ChakraProvider는 Chakra UI 라이브러리에서 제공하는 컨텍스트 프로바이더로, 테마, 스타일링, 그리고 Chakra UI 컴포넌트들이 제대로 동작하기 위한 설정을 제공합니다. 테스트 환경에서 ChakraProvider로 컴포넌트를 감싸주는 것은 다음과 같은 이유로 의미가 있습니다:
+   * ChakraProvider - Chakra UI 라이브러리에서 제공하는 컨텍스트 프로바이더
     테마 및 스타일링 적용: Chakra UI 컴포넌트들이 테마와 스타일을 올바르게 적용받을 수 있도록 합니다. 테마 관련 속성이 없으면 컴포넌트가 예상과 다르게 렌더링될 수 있습니다.
-    컨텍스트 제공: Chakra UI의 일부 컴포넌트는 내부적으로 컨텍스트를 사용합니다. 예를 들어, Modal, Tooltip 등은 ChakraProvider의 컨텍스트를 필요로 합니다.
     일관된 테스트 환경: 실제 애플리케이션과 동일한 환경에서 컴포넌트를 테스트할 수 있어, 테스트의 신뢰성을 높입니다.
-    따라서, ChakraProvider로 컴포넌트를 감싸주는 것은 Chakra UI를 사용하는 애플리케이션의 컴포넌트를 테스트할 때 중요하고 의미 있는 동작입니다.
    */
 };
 const setupMockHandlerFetching = (initialEvents: Event[]) => {
@@ -107,8 +105,8 @@ describe('일정 CRUD 및 기본 기능', () => {
     const user = setup(<App />).user;
 
     // 초기 이벤트가 렌더링되기를 기다림
-    const eventList = await screen.findByTestId('event-list');
-    expect(within(eventList).getByText('수정할 회의')).toBeInTheDocument();
+    const eventList = screen.getByTestId('event-list');
+    await waitFor(() => expect(within(eventList).getByText('수정할 회의')).toBeInTheDocument());
 
     // 편집 버튼 찾기
     const editButtons = within(eventList).getAllByLabelText(/Edit event/i);
@@ -166,10 +164,8 @@ describe('일정 CRUD 및 기본 기능', () => {
 
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
-
-    // 초기 이벤트가 존재하는지 확인
-    expect(within(eventList).getByText('삭제할 회의')).toBeInTheDocument();
+    const eventList = screen.getByTestId('event-list');
+    await waitFor(() => expect(within(eventList).getByText('삭제할 회의')).toBeInTheDocument());
 
     setupMockHandlerDeletion();
     // 삭제 대상 이벤트의 삭제 버튼 찾기
@@ -192,13 +188,13 @@ describe('일정 뷰', () => {
     setupMockHandlerCreation();
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = await screen.getByTestId('event-list');
 
     // 주별 뷰 선택
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'week');
 
-    const weekView = await screen.findByTestId('week-view');
+    const weekView = await screen.getByTestId('week-view');
     // 주별 뷰가 렌더링되었는지 확인
     expect(weekView).toBeInTheDocument();
     expect(within(eventList).queryByText('검색 결과가 없습니다.')).toBeInTheDocument();
@@ -219,13 +215,13 @@ describe('일정 뷰', () => {
     const user = setup(<App />).user;
 
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = await screen.getByTestId('event-list');
 
     // 주별 뷰 선택
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'week');
 
-    const weekView = await screen.findByTestId('week-view');
+    const weekView = await screen.getByTestId('week-view');
     // 주별 뷰가 렌더링되었는지 확인
     expect(weekView).toBeInTheDocument();
     expect(within(weekView).queryByText('1001회의')).toBeInTheDocument();
@@ -251,13 +247,13 @@ describe('일정 뷰', () => {
       })
     );
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
     // 주별 뷰 선택
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'week');
 
-    const weekView = await screen.findByTestId('week-view');
+    const weekView = screen.getByTestId('week-view');
     // 주별 뷰가 렌더링되었는지 확인
     expect(weekView).toBeInTheDocument();
     // 'Next' 버튼을 클릭하여 다음 주로 이동
@@ -275,12 +271,12 @@ describe('일정 뷰', () => {
     setupMockHandlerCreation();
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
     // 월별 뷰 선택: 월별 뷰가 디폴트이긴하지만, 디폴트값이 기획상 변경되면 테스트코드 수정이 불가피함. 그래서 테스트 코드 내에 월별 뷰 설정 로직을 포함해야한다고 생각한다!
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'month');
 
-    const monthView = await screen.findByTestId('month-view');
+    const monthView = screen.getByTestId('month-view');
     // 월별 뷰가 렌더링되었는지 확인
     expect(monthView).toBeInTheDocument();
     expect(within(eventList).getByText('검색 결과가 없습니다.')).toBeInTheDocument();
@@ -301,13 +297,13 @@ describe('일정 뷰', () => {
     const user = setup(<App />).user;
 
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
     // 월별 뷰 선택
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'month');
 
-    const monthView = await screen.findByTestId('month-view');
+    const monthView = screen.getByTestId('month-view');
     // 월별 뷰가 렌더링되었는지 확인
     expect(monthView).toBeInTheDocument();
     expect(within(monthView).queryByText('1010회의')).toBeInTheDocument();
@@ -322,7 +318,7 @@ describe('일정 뷰', () => {
     const viewSelect = screen.getByLabelText(/view/i); // 'view' 레이블을 가진 Select 요소
     await user.selectOptions(viewSelect, 'month');
 
-    const monthView = await screen.findByTestId('month-view');
+    const monthView = screen.getByTestId('month-view');
     // 월별 뷰가 렌더링되었는지 확인
     expect(monthView).toBeInTheDocument();
     const targetElement = screen.getByText('신정');
@@ -359,11 +355,13 @@ describe('검색 기능', () => {
 
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
-    // 초기 이벤트가 존재하는지 확인
-    expect(within(eventList).getByText('회의')).toBeInTheDocument();
-    expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
+    waitFor(() => {
+      // 초기 이벤트가 존재하는지 확인
+      expect(within(eventList).getByText('회의')).toBeInTheDocument();
+      expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
+    });
 
     // 검색 입력 필드 찾기
     const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
@@ -373,7 +371,7 @@ describe('검색 기능', () => {
     await user.type(searchInput, '없는 일정');
 
     // "검색 결과가 없습니다." 메시지가 나타날 때까지 기다림
-    const noResultsMessage = await screen.findByText('검색 결과가 없습니다.');
+    const noResultsMessage = await screen.getByText('검색 결과가 없습니다.');
 
     // 메시지가 표시되었는지 확인
     expect(noResultsMessage).toBeInTheDocument();
@@ -429,14 +427,15 @@ describe('검색 기능', () => {
 
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
-    // 초기 이벤트가 존재하는지 확인
-    expect(within(eventList).getByText('팀 회의')).toBeInTheDocument();
-    expect(within(eventList).getByText('항해팀 회의')).toBeInTheDocument();
-    expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
-    expect(within(eventList).getByText('미팅')).toBeInTheDocument();
-
+    waitFor(() => {
+      // 초기 이벤트가 존재하는지 확인
+      expect(within(eventList).getByText('팀 회의')).toBeInTheDocument();
+      expect(within(eventList).getByText('항해팀 회의')).toBeInTheDocument();
+      expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
+      expect(within(eventList).getByText('미팅')).toBeInTheDocument();
+    });
     // 검색 입력 필드 찾기
     const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
 
@@ -478,12 +477,13 @@ describe('검색 기능', () => {
 
     const user = setup(<App />).user;
     // 이벤트 목록이 렌더링될 때까지 기다림
-    const eventList = await screen.findByTestId('event-list');
+    const eventList = screen.getByTestId('event-list');
 
-    // 초기 이벤트가 존재하는지 확인
-    expect(within(eventList).getByText('팀 회의')).toBeInTheDocument();
-    expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
-
+    waitFor(() => {
+      // 초기 이벤트가 존재하는지 확인
+      expect(within(eventList).getByText('팀 회의')).toBeInTheDocument();
+      expect(within(eventList).getByText('점심식사')).toBeInTheDocument();
+    });
     // 검색 입력 필드 찾기
     const searchInput = screen.getByPlaceholderText('검색어를 입력하세요');
 
@@ -538,7 +538,7 @@ describe('일정 충돌', () => {
 
     expect(screen.getByText(/일정 겹침 경고/i)).toBeInTheDocument();
     // 겹침 경고 AlertDialog가 나타날 때까지 기다림
-    const alertDialog = await screen.findByRole('alertdialog');
+    const alertDialog = screen.getByRole('alertdialog');
     expect(alertDialog).toBeInTheDocument();
 
     // AlertDialog의 헤더 확인
@@ -590,8 +590,8 @@ describe('일정 충돌', () => {
     const user = setup(<App />).user;
 
     // 초기 이벤트가 렌더링되기를 기다림
-    const eventList = await screen.findByTestId('event-list');
-    expect(within(eventList).getByText('수정할 회의')).toBeInTheDocument();
+    const eventList = screen.getByTestId('event-list');
+    await waitFor(() => expect(within(eventList).getByText('수정할 회의')).toBeInTheDocument());
 
     // 편집 버튼 찾기
     const editButtons = within(eventList).getAllByLabelText(/Edit event/i);
@@ -620,9 +620,8 @@ describe('일정 충돌', () => {
     // 저장 버튼 클릭
     const saveButton = screen.getByTestId('event-submit-button');
     await user.click(saveButton);
-    await screen.findByTestId('event-list');
 
-    // 시간 설정 오류 노출 확인
+    // // 시간 설정 오류 노출 확인
     expect(screen.getByText(/시간 설정을 확인해주세요/i)).toBeInTheDocument();
   });
 });
