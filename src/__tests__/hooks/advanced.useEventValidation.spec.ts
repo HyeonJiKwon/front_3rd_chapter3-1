@@ -1,4 +1,3 @@
-import { useToast } from '@chakra-ui/react';
 import { act, renderHook } from '@testing-library/react';
 
 import useEventValidation from '../../hooks/useEventValidation';

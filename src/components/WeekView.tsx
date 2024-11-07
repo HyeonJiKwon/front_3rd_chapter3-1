@@ -59,7 +59,7 @@ export const WeekView = ({ currentDate, filteredEvents, notifiedEvents }: Props)
                         color={isNotified ? 'red.500' : 'inherit'}
                       >
                         <HStack spacing={1}>
-                          {isNotified && <BellIcon />}
+                          {isNotified && <BellIcon data-testid={`bell-icon-${event.id}`} />}
                           <Text fontSize="sm" noOfLines={1}>
                             {event.title}
                           </Text>
