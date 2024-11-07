@@ -21,7 +21,7 @@ const setup = (element: ReactElement) => {
   return { ...render(<ChakraProvider>{element}</ChakraProvider>), user }; // ? Medium: 여기서 ChakraProvider로 묶어주는 동작은 의미있을까요? 있다면 어떤 의미일까요?
   /**
    * ChakraProvider - Chakra UI 라이브러리에서 제공하는 컨텍스트 프로바이더
-    테마 및 스타일링 적용: Chakra UI 컴포넌트들이 테마와 스타일을 올바르게 적용받을 수 있도록 합니다. 테마 관련 속성이 없으면 컴포넌트가 예상과 다르게 렌더링될 수 있습니다.
+    테마 및 스타일링 적용: Chakra UI 컴포넌트들이 테마와 스타일을 올바르게 적용받게 합니다. 테마 관련 속성이 없으면 컴포넌트가 예상과 다르게 렌더링될 수 있기 때문입니다.
     일관된 테스트 환경: 실제 애플리케이션과 동일한 환경에서 컴포넌트를 테스트할 수 있어, 테스트의 신뢰성을 높입니다.
    */
 };

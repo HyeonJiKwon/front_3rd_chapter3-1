@@ -4,6 +4,11 @@ import { server } from '../setupTests';
 import { Event } from '../types';
 
 // ? Medium: 아래 여러가지 use 함수는 어떤 역할을 할까요? 어떻게 사용될 수 있을까요?
+/**
+  * A: API의 로직에 따라 Mocking하여 사용합니다.  API 통신 '잘 됐다 치고!',  
+  백엔드(API)에 의존적이지 않도록합니다. 예를 들어 API의 이슈가 있더라도 우리의 테스트 코드는 정상작동해야 하기 때문입니다. 
+ */
+
 export const setupMockHandlerCreation = (initEvents = [] as Event[]) => {
   const mockEvents: Event[] = [...initEvents];
 

@@ -14,8 +14,7 @@ import { createMockEvent } from '../utils.ts';
 // ? Medium: 아래 toastFn과 mock과 이 fn은 무엇을 해줄까요?
 const toastFn = vi.fn();
 /**
- * toastFn는 모킹 함수입니다.
- * vi.fn 는
+ * 훅의 테스트이기 때문에 , useToast의 실제 동작과는 독립적이여야 함. 그래서 훅 내부에서 필요한 함수 (useToast)를  vitest의 도움(?)으로 mocking하여 사용하기위해 선언합니다.
  */
 vi.mock('@chakra-ui/react', async () => {
   const actual = await vi.importActual('@chakra-ui/react');
