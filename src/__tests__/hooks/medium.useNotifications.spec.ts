@@ -2,8 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 
 import { useNotifications } from '../../hooks/useNotifications.ts';
 import { Event } from '../../types.ts';
-import { formatDate } from '../../utils/dateUtils.ts';
-import { createMockEvent, parseHM } from '../utils.ts';
+import { createMockEvent } from '../utils.ts';
 
 describe('useNotifications', () => {
   const mockEvents: Event[] = [

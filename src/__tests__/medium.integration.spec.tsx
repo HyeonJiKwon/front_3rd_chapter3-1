@@ -549,7 +549,7 @@ describe('일정 충돌', () => {
 
     // '취소' 버튼과 '계속 진행' 버튼 찾기
     const cancelButton = within(alertDialog).getByRole('button', { name: /취소/i });
-    const continueButton = within(alertDialog).getByRole('button', { name: /계속 진행/i });
+    // const continueButton = within(alertDialog).getByRole('button', { name: /계속 진행/i });
 
     // '취소' 버튼 클릭하여 경고 닫기
     await user.click(cancelButton);

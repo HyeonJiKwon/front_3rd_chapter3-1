@@ -40,7 +40,7 @@ import { useEventOperations } from './hooks/useEventOperations.ts';
 import useEventValidation from './hooks/useEventValidation.ts';
 import { useNotifications } from './hooks/useNotifications.ts';
 import { useSearch } from './hooks/useSearch.ts';
-import { Event, EventForm, RepeatType } from './types';
+import { Event, RepeatType } from './types';
 import { findOverlappingEvents } from './utils/eventOverlap';
 import { prepareEventData } from './utils/prepareEventData.ts';
 import { getTimeErrorMessage } from './utils/timeValidation';
